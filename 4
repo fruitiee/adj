@@ -1,0 +1,55 @@
+internship_form.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Student Internship Form</title>
+</head>
+<body>
+ <h2>Student Internship Submission</h2>
+ <form action="internship_display.jsp" method="post">
+ Name: <input type="text" name="studentName" required><br><br>
+ Register Number: <input type="text" name="registerNumber" required><br><br>
+ Internship Company: <input type="text" name="companyName" required><br><br>
+ Duration (in months): <input type="number" name="duration" required><br><br>
+ <input type="submit" value="Submit Internship Details">
+ </form>
+</body>
+</html>
+
+internship_display.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+ String studentName1 = request.getParameter("studentName");
+ String registerNumber1 = request.getParameter("registerNumber");
+ String companyName1 = request.getParameter("companyName");
+ String duration1 = request.getParameter("duration");
+ session.setAttribute("studentName", studentName1);
+ session.setAttribute("companyName", companyName1);
+ application.setAttribute("institution", "ABC College of Engineering");
+ response.setContentType("text/html");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Internship Details</title>
+</head>
+<body>
+ <h2>Internship Details Submitted</h2>
+ <p><strong>Name:</strong> <%= studentName1 %></p>
+ <p><strong>Register Number:</strong> <%= registerNumber1%></p>
+ <p><strong>Company Name:</strong> <%= companyName1 %></p>
+ <p><strong>Duration:</strong> <%= duration1 %> month(s)</p>
+ <h3>Using JSP Intrinsic Objects</h3>
+ <ul>
+ <li><strong>Request Method:</strong> <%= request.getMethod() %></li>
+ <li><strong>Session ID:</strong> <%= session.getId() %></li>
+ <li><strong>Server Info:</strong> <%= application.getServerInfo() %></li>
+ <li><strong>Institution (Application Scope):</strong> <%= application.getAttribute("institution") %></li>
+ <li><strong>Client IP Address:</strong> <%= request.getRemoteAddr() %></li>
+ <li><strong>Response Content Type:</strong> <%= response.getContentType() %></li>
+ </ul>
+</body>
+</html>
