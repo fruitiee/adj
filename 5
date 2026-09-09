@@ -1,0 +1,94 @@
+index.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Employee Form</title>
+<style>
+body { font-family: Arial; margin: 40px; }
+.error { color: red; }
+</style>
+</head>
+<body>
+<h2>Employee Registration</h2>
+<%
+String error = request.getParameter("error");
+if ("1".equals(error)) {
+%>
+<p class="error">Please fill all the fields correctly!</p>
+<% } %>
+<form action="result.jsp" method="post">
+<label>Name:</label>
+<input type="text" name="name" required><br><br>
+<label>Age:</label>
+<input type="number" name="age" required min="18" max="60"><br><br>
+<label>Email:</label>
+<input type="email" name="email" required><br><br>
+<label>Gender:</label>
+<input type="radio" name="gender" value="Male" required> Male
+<input type="radio" name="gender" value="Female"> Female<br><br>
+<label>Hobbies:</label><br>
+<input type="checkbox" name="hobbies" value="Reading"> Reading<br>
+<input type="checkbox" name="hobbies" value="Traveling"> Traveling<br>
+<input type="checkbox" name="hobbies" value="Gaming"> Gaming<br><br>
+<input type="submit" value="Submit">
+</form>
+</body>
+</html>
+
+result.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page import="java.util.*" %>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Employee Details</title>
+<style>
+body { font-family: Arial; margin: 40px; }
+.error { color: red; }
+</style>
+</head>
+<body>
+<%
+String name = request.getParameter("name");
+String ageStr = request.getParameter("age");
+String email = request.getParameter("email");
+String gender = request.getParameter("gender");
+String[] hobbies = request.getParameterValues("hobbies");
+boolean isValid = true;
+if (name == null || name.trim().isEmpty()) isValid = false;
+if (ageStr == null || ageStr.trim().isEmpty()) isValid = false;
+if (email == null || email.trim().isEmpty()) isValid = false;
+if (gender == null) isValid = false;
+int age = 0;
+try {
+age = Integer.parseInt(ageStr);
+if (age < 18 || age > 60) isValid = false;
+} catch (Exception e) {
+isValid = false;
+}
+if (!isValid) {
+response.sendRedirect("index.jsp?error=1");
+return;
+}
+%>
+<h2>Submitted Employee Details</h2>
+<p><strong>Name:</strong> <%= name %></p>
+<p><strong>Age:</strong> <%= age %></p>
+<p><strong>Email:</strong> <%= email %></p>
+<p><strong>Gender:</strong> <%= gender %></p>
+<p><strong>Hobbies:</strong>
+<%
+if (hobbies != null) {
+for (String h : hobbies) {
+out.print(h + " ");
+}
+} else {
+out.print("None");
+}
+%>
+</p>
+</body>
+</html>
