@@ -1,0 +1,249 @@
+Open Spring initlizer in browser
+  project-maven
+  lang-java
+  spring boot-4.1.1
+  artifact-employee
+  packaging-jar
+  configuration-properties
+  Java-17
+Add dependencies
+Choose Spring web
+give Generate ----a file will be downloaded
+check if pom.xml file existed in the downloaded folder
+Extract all 
+Open eclipse,file>Import>Existing maven project>Browse>click dowloaded folder>finish
+Open project explorer>restapi>new>Class-StudentController.java>finish
+restapi>new>Class-Student.java>finish
+Restapi>resources>properties>type this---server.port=8083
+
+Employee.java
+
+
+
+package com.example.employeeapi;
+
+
+
+public class Employee {
+
+
+
+    private int id;
+
+    private String name;
+
+    private String department;
+
+    private double salary;
+
+
+
+    public Employee() {
+
+    }
+
+
+
+    public Employee(int id, String name, String department, double salary) {
+
+        this.id = id;
+
+        this.name = name;
+
+        this.department = department;
+
+        this.salary = salary;
+
+    }
+
+
+
+    public int getId() {
+
+        return id;
+
+    }
+
+
+
+    public void setId(int id) {
+
+        this.id = id;
+
+    }
+
+
+
+    public String getName() {
+
+        return name;
+
+    }
+
+
+
+    public void setName(String name) {
+
+        this.name = name;
+
+    }
+
+
+
+    public String getDepartment() {
+
+        return department;
+
+    }
+
+
+
+    public void setDepartment(String department) {
+
+        this.department = department;
+
+    }
+
+
+
+    public double getSalary() {
+
+        return salary;
+
+    }
+
+
+
+    public void setSalary(double salary) {
+
+        this.salary = salary;
+
+    }
+
+}
+
+
+
+EmployeeapiApplication.java
+
+
+
+package com.example.employeeapi;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class EmployeeapiApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(EmployeeapiApplication.class, args);
+    }
+}
+
+
+
+EmployeeController.java
+
+
+
+package com.example.employeeapi;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/employees")
+public class EmployeeController {
+
+    private List<Employee> employees = new ArrayList<>();
+
+    public EmployeeController() {
+
+        employees.add(
+            new Employee(1, "Malathi", "Computer Science", 30000)
+        );
+
+        employees.add(
+            new Employee(2, "Priya", "IT", 35000)
+        );
+    }
+
+    // GET - Get all employees
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        return employees;
+    }
+
+    // GET - Get employee by ID
+    @GetMapping("/{id}")
+    public Employee getEmployeeById(@PathVariable int id) {
+
+        for (Employee employee : employees) {
+            if (employee.getId() == id) {
+                return employee;
+            }
+        }
+
+        return null;
+    }
+
+    // POST - Add employee
+    @PostMapping
+    public Employee addEmployee(@RequestBody Employee employee) {
+
+        employees.add(employee);
+
+        return employee;
+    }
+
+    // PUT - Update employee
+    @PutMapping("/{id}")
+    public Employee updateEmployee(
+            @PathVariable int id,
+            @RequestBody Employee updatedEmployee) {
+
+        for (Employee employee : employees) {
+
+            if (employee.getId() == id) {
+
+                employee.setName(updatedEmployee.getName());
+                employee.setDepartment(updatedEmployee.getDepartment());
+                employee.setSalary(updatedEmployee.getSalary());
+
+                return employee;
+            }
+        }
+
+        return null;
+    }
+
+    // DELETE - Delete employee
+    @DeleteMapping("/{id}")
+    public String deleteEmployee(@PathVariable int id) {
+
+        for (Employee employee : employees) {
+
+            if (employee.getId() == id) {
+
+                employees.remove(employee);
+
+                return "Employee deleted successfully";
+            }
+        }
+
+        return "Employee not found";
+    }
+}
+postman open
+[
+    {
+        "id": 1,
+        "name": "Shrinidhi",
+        "department": "Computer Science"
+    }
+]
+
+
