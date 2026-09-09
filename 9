@@ -1,0 +1,341 @@
+Step 1: open mySQL workbench and click on localhost
+Step 2:on the sql environment paste the following code
+CREATE DATABASE prime;
+
+USE prime;
+
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(100),
+    price DOUBLE,
+    stock INT
+);
+
+INSERT INTO products (name, category, price, stock) VALUES
+('Laptop', 'Electronics', 55000.00, 10),
+('Smartphone', 'Electronics', 25000.00, 20),
+('Headphones', 'Accessories', 2000.00, 50),
+('Chair', 'Furniture', 3500.00, 15),
+('Book', 'Stationery', 500.00, 100);
+Step 3: click on run (which looks like a thunder symbol)
+Step 4:if it comes database already exists change the anme of the database an table wherever its called
+Step 5:open intelil JIDEA and click on create new project – click on java -type the names as PrimeFacesProduct-choose the build system  type as: maven -choose jdk 17 if it is not available click on download jdk and select version as 17 
+Step 6: on additional settings change com.example as com.products and click on create
+Step 7:click pom.xml paste the following code
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.product</groupId>
+    <artifactId>PrimeFacesProduct</artifactId>
+    <version>1.0</version>
+
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+
+        <!-- JSF -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.faces</artifactId>
+            <version>4.0.5</version>
+        </dependency>
+
+        <!-- PrimeFaces -->
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>15.0.4</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+
+        <!-- CDI -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-shaded</artifactId>
+            <version>5.1.2.Final</version>
+        </dependency>
+
+        <!-- MySQL -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.4.0</version>
+        </dependency>
+
+        <!-- Servlet -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <finalName>PrimeFacesProduct</finalName>
+    </build>
+
+</project>
+Step 8:once code is pasted on the right side panel click on M (which is maven) on the reload button click on dropdown click on reload all maven project
+Step 9:Right click com.products-new-java class- type the name as: product and paste the following code
+package com.products;
+
+public class Product {
+
+    private int id;
+    private String name;
+    private String category;
+    private double price;
+    private int stock;
+
+    // Default constructor
+    public Product() {
+    }
+
+    // Parameterized constructor
+    public Product(int id, String name, String category,
+                   double price, int stock) {
+        this.id = id;
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.stock = stock;
+    }
+
+    // Getters and Setters
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+}
+Step 10 :Right  click com.products-new-java class-name as : ProductBean and paste the following code  and ensure that the jdbc password should be the MySQL workbench password:PSGRKCW
+package com.products;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Named;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+@Named("productBean")
+@RequestScoped
+public class ProductBean {
+
+    private List<Product> products;
+
+    private String jdbcURL =
+            "jdbc:mysql://localhost:3306/prime";
+
+    private String jdbcUsername = "root";
+
+    private String jdbcPassword = "";
+
+    public List<Product> getProducts() {
+
+        if (products == null) {
+
+            products = new ArrayList<>();
+
+            try {
+
+                Class.forName("com.mysql.cj.jdbc.Driver");
+
+                Connection conn = DriverManager.getConnection(
+                        jdbcURL,
+                        jdbcUsername,
+                        jdbcPassword
+                );
+
+                Statement stmt = conn.createStatement();
+
+                ResultSet rs = stmt.executeQuery(
+                        "SELECT * FROM products"
+                );
+
+                while (rs.next()) {
+
+                    Product product = new Product(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("category"),
+                            rs.getDouble("price"),
+                            rs.getInt("stock")
+                    );
+
+                    products.add(product);
+                }
+
+                rs.close();
+                stmt.close();
+                conn.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return products;
+    }
+}
+Step 11:Right click main-new -directory-Name as Webapp 
+Step 12:Right click webapp-New-File- name as :Products.xhtml and paste the code
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces">
+
+<h:head>
+    <title>Product List</title>
+</h:head>
+
+<h:body>
+
+    <h1>Product List</h1>
+
+    <h:form>
+
+        <p:dataTable value="#{productBean.products}"
+                     var="prod"
+                     paginator="true"
+                     rows="5"
+                     sortMode="multiple"
+                     filterDelay="500">
+
+            <p:column headerText="ID"
+                      sortBy="#{prod.id}"
+                      filterBy="#{prod.id}">
+                <h:outputText value="#{prod.id}"/>
+            </p:column>
+
+            <p:column headerText="Name"
+                      sortBy="#{prod.name}"
+                      filterBy="#{prod.name}">
+                <h:outputText value="#{prod.name}"/>
+            </p:column>
+
+            <p:column headerText="Category"
+                      sortBy="#{prod.category}"
+                      filterBy="#{prod.category}">
+                <h:outputText value="#{prod.category}"/>
+            </p:column>
+
+            <p:column headerText="Price"
+                      sortBy="#{prod.price}"
+                      filterBy="#{prod.price}">
+                <h:outputText value="#{prod.price}"/>
+            </p:column>
+
+            <p:column headerText="Stock"
+                      sortBy="#{prod.stock}"
+                      filterBy="#{prod.stock}">
+                <h:outputText value="#{prod.stock}"/>
+            </p:column>
+
+        </p:dataTable>
+
+    </h:form>
+
+</h:body>
+
+</html>
+Step 13:Right click webapp-new-directory-name as: WEB-INF
+Step 14:Right click WEB-INF -New-file -beans.xml and paste the following code
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+       https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
+       version="4.0">
+</beans>
+Step 15:Right click WEB-INF -New-file -web.xml and paste the following code
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+
+        <servlet-class>
+            jakarta.faces.webapp.FacesServlet
+        </servlet-class>
+
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+
+        <url-pattern>*.xhtml</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>Products.xhtml</welcome-file>
+    </welcome-file-list>
+
+</web-app>
+Step 16:on the Right corner -click maven -double click your project-double click lifevycle and click on clean once it build success and then click on packages once it become build success add the tomcat
+Step 17:on the top click on current file click on edit configuration -click on tomcat local- click on tomcat version 10.1.59 or else download and add configuration 
+Step 18:click on deployement option in the edit configuration itself 
+Step 19:click add (which will be addition symbol) and click on PrimeFacesProducts:warexploded  and on the bottom application content  make sure that it should only contains /PrimeFacesProduct
+Step 20: click on apply and ok and then click on run 
+               
+
