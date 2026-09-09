@@ -1,0 +1,271 @@
+File>New>Maven Project>Create simple project(check box)-enable,use default workspace enable---give next
+Group ID: com.demo
+Artifact:rabbitmq-exam
+Click --finish
+Open rabbitmq in project explorer
+rabbitmq>src>main>java>right click>new>class--classname:ExamRunner,enable public,inherit>finish
+project explorer>pom.xml>copy the below code
+
+pom.xml
+
+<project xmlns="http://apache.org" 
+xmlns:xsi="http://w3.org" 
+xsi:schemaLocation="http://apache.org https://apache.org"> 
+<modelVersion>4.0.0</modelVersion> 
+<groupId>com.demo</groupId> 
+<artifactId>exam-app</artifactId> 
+<version>1.0</version> 
+<properties> 
+<maven.compiler.source>17</maven.compiler.source> 
+<maven.compiler.target>17</maven.compiler.target> 
+</properties> 
+<dependencies> 
+<!-- Core Struts 2 --> 
+<dependency> 
+<groupId>org.apache.struts</groupId> 
+<artifactId>struts2-core</artifactId> 
+<version>6.3.0</version> 
+</dependency> 
+<!-- CRITICAL FIX: The missing official RabbitMQ Java Client Driver --> 
+<dependency> 
+<groupId>com.rabbitmq</groupId> 
+<artifactId>amqp-client</artifactId> 
+<version>5.22.0</version> 
+</dependency> 
+<!-- In-Memory Zero-Setup RabbitMQ Broker Simulator --> 
+<dependency> 
+<groupId>com.github.fridujo</groupId> 
+<artifactId>rabbitmq-mock</artifactId> 
+<version>1.1.1</version> 
+</dependency> 
+</dependencies> 
+</project> 
+
+
+ExamRunner.java 
+
+package com.demo;
+
+import com.github.fridujo.rabbitmq.mock.MockConnectionFactory;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.GetResponse;
+
+import javax.swing.*;
+import java.awt.*;
+
+// ========================================================
+// 1. THE STRUTS ACTION CLASS
+// ========================================================
+class ParentAction {
+
+    private String studentName;
+    private String fatherName;
+    private String motherName;
+    private String displayMessage;
+
+    private static final ConnectionFactory factory =
+            new MockConnectionFactory();
+
+    private static final String QUEUE_NAME =
+            "exam_student_buffer_queue";
+
+    public String submitAndRetrieve() throws Exception {
+
+        // PRODUCER
+        try (Connection conn = factory.newConnection();
+             Channel ch = conn.createChannel()) {
+
+            ch.queueDeclare(QUEUE_NAME, false, false, false, null);
+
+            String payload =
+                    "Student: " + studentName +
+                    " | Father: " + fatherName +
+                    " | Mother: " + motherName;
+
+            ch.basicPublish(
+                    "",
+                    QUEUE_NAME,
+                    null,
+                    payload.getBytes("UTF-8")
+            );
+        }
+
+        // CONSUMER
+        try (Connection conn = factory.newConnection();
+             Channel ch = conn.createChannel()) {
+
+            ch.queueDeclare(QUEUE_NAME, false, false, false, null);
+
+            GetResponse response = ch.basicGet(QUEUE_NAME, true);
+
+            if (response != null) {
+                displayMessage =
+                        "Success! Data processed via RabbitMQ Buffer:\n" +
+                        new String(response.getBody(), "UTF-8");
+            } else {
+                displayMessage = "The buffer queue is empty.";
+            }
+        }
+
+        return "success";
+    }
+
+    public void setStudentName(String s) {
+        this.studentName = s;
+    }
+
+    public void setFatherName(String f) {
+        this.fatherName = f;
+    }
+
+    public void setMotherName(String m) {
+        this.motherName = m;
+    }
+
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+}
+
+// ========================================================
+// 2. MAIN APPLICATION
+// ========================================================
+public class ExamRunner {
+
+    public static void main(String[] args) {
+
+        ParentAction actionInstance = new ParentAction();
+
+        JFrame frame = new JFrame("Student Registration Form");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 350);
+        frame.setLocationRelativeTo(null);
+
+        // Main panel
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+
+        // Form panel
+        JPanel formCard = new JPanel(new GridBagLayout());
+        formCard.setBorder(
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        );
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Input fields
+        JTextField txtStudent = new JTextField(18);
+        JTextField txtFather = new JTextField(18);
+        JTextField txtMother = new JTextField(18);
+
+        JButton btnSubmit = new JButton("Submit & Process");
+
+        btnSubmit.setBackground(new Color(41, 128, 185));
+        btnSubmit.setForeground(Color.WHITE);
+        btnSubmit.setFocusPainted(false);
+
+        // ------------------------------------------------
+        // Student Name
+        // ------------------------------------------------
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        formCard.add(new JLabel("Student Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        formCard.add(txtStudent, gbc);
+
+        // ------------------------------------------------
+        // Father Name
+        // ------------------------------------------------
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        formCard.add(new JLabel("Father Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        formCard.add(txtFather, gbc);
+
+        // ------------------------------------------------
+        // Mother Name
+        // ------------------------------------------------
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        formCard.add(new JLabel("Mother Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        formCard.add(txtMother, gbc);
+
+        // ------------------------------------------------
+        // Submit Button
+        // ------------------------------------------------
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+
+        formCard.add(btnSubmit, gbc);
+
+        // Add form to center of window
+        mainPanel.add(formCard);
+        frame.add(mainPanel);
+
+        // ------------------------------------------------
+        // Button Action
+        // ------------------------------------------------
+        btnSubmit.addActionListener(e -> {
+
+            try {
+
+                actionInstance.setStudentName(
+                        txtStudent.getText()
+                );
+
+                actionInstance.setFatherName(
+                        txtFather.getText()
+                );
+
+                actionInstance.setMotherName(
+                        txtMother.getText()
+                );
+
+                actionInstance.submitAndRetrieve();
+
+                JOptionPane.showMessageDialog(
+                        frame,
+                        actionInstance.getDisplayMessage(),
+                        "RabbitMQ Processing Report",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                txtStudent.setText("");
+                txtFather.setText("");
+                txtMother.setText("");
+
+            } catch (Exception ex) {
+
+                JOptionPane.showMessageDialog(
+                        frame,
+                        "Error: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+
+        frame.setVisible(true);
+    }
+}
+
+Error come>double tap
+
+Run the program 
