@@ -58,16 +58,16 @@ File:
 
 EmpoyeeRegistrationApplication.java
 Code:
-package com.example.EmpoyeeRegistration;
+package com.example.EmployeeRegistration;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EmpoyeeRegistrationApplication {
+public class EmployeeRegistrationApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EmpoyeeRegistrationApplication.class, args);
+        SpringApplication.run(EmployeeRegistrationApplication.class, args);
     }
 }
 
@@ -77,7 +77,7 @@ Create:
 
 EmployeeController.java
 Code:
-package com.example.EmpoyeeRegistration;
+package com.example.EmployeeRegistration;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
