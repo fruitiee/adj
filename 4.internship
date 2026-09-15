@@ -1,3 +1,6 @@
+Eclipse>file>dynamic web project--internshipapplication
+src>main>new>jsp file--->internship_form.jsp
+
 internship_form.jsp
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -17,6 +20,8 @@ internship_form.jsp
  </form>
 </body>
 </html>
+
+src>main>new>jsp file--->internship_display.jsp
 
 internship_display.jsp
 
