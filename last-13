@@ -1,0 +1,179 @@
+File---->New------>Dynamin Web project---File Name:EmployeeApp
+in project explorer
+>src
+>main
+>WEBAPP
+>WEB-INF----->right click--->new------->create---->xml file--->file name: web.xml
+next
+>src
+>java
+webapp------>rightclick----->new-------->jsp file---------->EmployeeRegistration
+
+
+
+
+web.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         id="WebApp_ID" version="4.0">
+
+    <display-name>EmployeeApp</display-name>
+
+    <!-- Welcome file - loads automatically when you hit the root URL -->
+    <welcome-file-list>
+        <welcome-file>EmployeeRegistration.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- Session timeout in minutes -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+</web-app>
+
+EmployeeRegistration
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Registration Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 450px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #1c5980;
+        }
+        .success-box {
+            margin: 40px auto;
+            width: 450px;
+            background: #eafaf1;
+            border: 1px solid #2ecc71;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .success-box h3 {
+            color: #27ae60;
+        }
+        table {
+            width: 100%;
+        }
+        table td {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<%
+    // Simple server-side handling using JSP scriptlet (no DB, no framework)
+    String name = request.getParameter("empName");
+    String email = request.getParameter("empEmail");
+    String dept = request.getParameter("empDept");
+    String designation = request.getParameter("empDesignation");
+    String phone = request.getParameter("empPhone");
+
+    boolean isSubmitted = (name != null && !name.trim().isEmpty());
+%>
+
+<% if (!isSubmitted) { %>
+
+    <div class="container">
+        <h2>Employee Registration Form</h2>
+        <form action="EmployeeRegistration.jsp" method="post">
+
+            <label for="empName">Full Name</label>
+            <input type="text" id="empName" name="empName" placeholder="Enter full name" required>
+
+            <label for="empEmail">Email</label>
+            <input type="email" id="empEmail" name="empEmail" placeholder="Enter email address" required>
+
+            <label for="empPhone">Phone Number</label>
+            <input type="text" id="empPhone" name="empPhone" placeholder="Enter phone number" required>
+
+            <label for="empDept">Department</label>
+            <select id="empDept" name="empDept" required>
+                <option value="">-- Select Department --</option>
+                <option value="HR">Human Resources</option>
+                <option value="IT">Information Technology</option>
+                <option value="Finance">Finance</option>
+                <option value="Sales">Sales</option>
+                <option value="Marketing">Marketing</option>
+            </select>
+
+            <label for="empDesignation">Designation</label>
+            <input type="text" id="empDesignation" name="empDesignation" placeholder="Enter designation" required>
+
+            <input type="submit" value="Register Employee">
+        </form>
+    </div>
+
+<% } else { %>
+
+    <div class="success-box">
+        <h3>✅ Employee Registered Successfully!</h3>
+        <table>
+            <tr><td><b>Name:</b></td><td><%= name %></td></tr>
+            <tr><td><b>Email:</b></td><td><%= email %></td></tr>
+            <tr><td><b>Phone:</b></td><td><%= phone %></td></tr>
+            <tr><td><b>Department:</b></td><td><%= dept %></td></tr>
+            <tr><td><b>Designation:</b></td><td><%= designation %></td></tr>
+        </table>
+        <br>
+        <a href="EmployeeRegistration.jsp">➕ Register Another Employee</a>
+    </div>
+ 
+<% } %>
+
+</body>
+</html>
