@@ -1,341 +1,240 @@
-Step 1: open mySQL workbench and click on localhost
-Step 2:on the sql environment paste the following code
-CREATE DATABASE prime;
+File---->New------>Dynamin Web project---File Name: Productss
+Click next > click next > Generate web.xml deployment descriptor' checkbox tick pannunga > click Finish 
+in project explorer
+>src
+>main
+>webapp ------> right click ------> new------>products.jsp
 
-USE prime;
 
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    category VARCHAR(100),
-    price DOUBLE,
-    stock INT
-);
+>src
+>main
+>webapp
+>WEB-INF ----------> web.xml
 
-INSERT INTO products (name, category, price, stock) VALUES
-('Laptop', 'Electronics', 55000.00, 10),
-('Smartphone', 'Electronics', 25000.00, 20),
-('Headphones', 'Accessories', 2000.00, 50),
-('Chair', 'Furniture', 3500.00, 15),
-('Book', 'Stationery', 500.00, 100);
-Step 3: click on run (which looks like a thunder symbol)
-Step 4:if it comes database already exists change the anme of the database an table wherever its called
-Step 5:open intelil JIDEA and click on create new project – click on java -type the names as PrimeFacesProduct-choose the build system  type as: maven -choose jdk 17 if it is not available click on download jdk and select version as 17 
-Step 6: on additional settings change com.example as com.products and click on create
-Step 7:click pom.xml paste the following code
-<?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+products.jsp
 
-    <modelVersion>4.0.0</modelVersion>
+<%@ page language="java" contentType="text/html; charset=UTF-8" import="java.util.*" %>
+<%!
+    class Product {
+        int id; String name, category; double price; int stock;
+        Product(int id, String name, String category, double price, int stock) {
+            this.id = id; this.name = name; this.category = category;
+            this.price = price; this.stock = stock;
+        }
+    }
+%>
+<%
+    // Hardcoded product data (no DB) - 12 products to demo pagination
+    List<Product> products = new ArrayList<>();
+    products.add(new Product(1, "Laptop", "Electronics", 55000.0, 10));
+    products.add(new Product(2, "Smartphone", "Electronics", 25000.0, 20));
+    products.add(new Product(3, "Headphones", "Accessories", 2000.0, 50));
+    products.add(new Product(4, "Chair", "Furniture", 3500.0, 15));
+    products.add(new Product(5, "Book", "Stationery", 500.0, 100));
+    products.add(new Product(6, "Monitor", "Electronics", 12000.0, 8));
+    products.add(new Product(7, "Keyboard", "Accessories", 1500.0, 40));
+    products.add(new Product(8, "Mouse", "Accessories", 800.0, 60));
+    products.add(new Product(9, "Desk", "Furniture", 7000.0, 12));
+    products.add(new Product(10, "Notebook", "Stationery", 60.0, 200));
+    products.add(new Product(11, "Pen", "Stationery", 10.0, 500));
+    products.add(new Product(12, "Printer", "Electronics", 9000.0, 6));
 
-    <groupId>com.product</groupId>
-    <artifactId>PrimeFacesProduct</artifactId>
-    <version>1.0</version>
+    // Filters
+    String fId = request.getParameter("fId");
+    String fName = request.getParameter("fName");
+    String fCategory = request.getParameter("fCategory");
+    String fPrice = request.getParameter("fPrice");
+    String fStock = request.getParameter("fStock");
 
-    <packaging>war</packaging>
+    // Sort
+    String sortCol = request.getParameter("sort");
+    String order = request.getParameter("order");
+    if (sortCol == null) sortCol = "id";
+    if (order == null) order = "asc";
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
+    // Pagination params
+    int pageSize = 5;
+    int currentPage = 1;
+    try {
+        currentPage = Integer.parseInt(request.getParameter("page"));
+    } catch (Exception e) { currentPage = 1; }
+    if (currentPage < 1) currentPage = 1;
 
-    <dependencies>
-
-        <!-- JSF -->
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.faces</artifactId>
-            <version>4.0.5</version>
-        </dependency>
-
-        <!-- PrimeFaces -->
-        <dependency>
-            <groupId>org.primefaces</groupId>
-            <artifactId>primefaces</artifactId>
-            <version>15.0.4</version>
-            <classifier>jakarta</classifier>
-        </dependency>
-
-        <!-- CDI -->
-        <dependency>
-            <groupId>org.jboss.weld.servlet</groupId>
-            <artifactId>weld-servlet-shaded</artifactId>
-            <version>5.1.2.Final</version>
-        </dependency>
-
-        <!-- MySQL -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>9.4.0</version>
-        </dependency>
-
-        <!-- Servlet -->
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-    </dependencies>
-
-    <build>
-        <finalName>PrimeFacesProduct</finalName>
-    </build>
-
-</project>
-Step 8:once code is pasted on the right side panel click on M (which is maven) on the reload button click on dropdown click on reload all maven project
-Step 9:Right click com.products-new-java class- type the name as: product and paste the following code
-package com.products;
-
-public class Product {
-
-    private int id;
-    private String name;
-    private String category;
-    private double price;
-    private int stock;
-
-    // Default constructor
-    public Product() {
+    // Apply filters
+    List<Product> filtered = new ArrayList<>();
+    for (Product p : products) {
+        boolean match = true;
+        if (fId != null && !fId.isEmpty() && !String.valueOf(p.id).contains(fId)) match = false;
+        if (fName != null && !fName.isEmpty() && !p.name.toLowerCase().contains(fName.toLowerCase())) match = false;
+        if (fCategory != null && !fCategory.isEmpty() && !p.category.toLowerCase().contains(fCategory.toLowerCase())) match = false;
+        if (fPrice != null && !fPrice.isEmpty() && !String.valueOf(p.price).contains(fPrice)) match = false;
+        if (fStock != null && !fStock.isEmpty() && !String.valueOf(p.stock).contains(fStock)) match = false;
+        if (match) filtered.add(p);
     }
 
-    // Parameterized constructor
-    public Product(int id, String name, String category,
-                   double price, int stock) {
-        this.id = id;
-        this.name = name;
-        this.category = category;
-        this.price = price;
-        this.stock = stock;
-    }
+    // Apply sorting
+    final String sCol = sortCol;
+    final boolean asc = order.equals("asc");
+    Collections.sort(filtered, new Comparator<Product>() {
+        public int compare(Product a, Product b) {
+            int result = 0;
+            switch (sCol) {
+                case "name": result = a.name.compareTo(b.name); break;
+                case "category": result = a.category.compareTo(b.category); break;
+                case "price": result = Double.compare(a.price, b.price); break;
+                case "stock": result = Integer.compare(a.stock, b.stock); break;
+                default: result = Integer.compare(a.id, b.id);
+            }
+            return asc ? result : -result;
+        }
+    });
 
-    // Getters and Setters
+    // Pagination calculation
+    int totalRecords = filtered.size();
+    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+    if (totalPages < 1) totalPages = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
 
-    public int getId() {
-        return id;
-    }
+    int startIndex = (currentPage - 1) * pageSize;
+    int endIndex = Math.min(startIndex + pageSize, totalRecords);
+    List<Product> pageData = filtered.subList(startIndex, endIndex);
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    String base = "products.jsp";
 
-    public String getName() {
-        return name;
-    }
+    // Preserve filters & sort when changing page
+    String qsPrefix = "sort=" + sortCol + "&order=" + order
+        + "&fId=" + (fId != null ? fId : "")
+        + "&fName=" + (fName != null ? fName : "")
+        + "&fCategory=" + (fCategory != null ? fCategory : "")
+        + "&fPrice=" + (fPrice != null ? fPrice : "")
+        + "&fStock=" + (fStock != null ? fStock : "");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        .container { border: 1px solid #ddd; border-radius: 8px; padding: 20px; }
+        h1 { font-family: 'Times New Roman', serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; background: #f8f9fa; padding: 10px; font-size: 14px; }
+        th a { text-decoration: none; color: #333; }
+        td { padding: 10px; border-top: 1px solid #eee; font-size: 14px; }
+        .filter-row td, .filter-row th { padding: 5px 10px; }
+        .filter-row input { width: 90%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+        .pagination { text-align: center; margin: 15px 0; }
+        .pagination a { text-decoration: none; color: #555; margin: 0 6px; }
+        .pagination a.disabled { color: #ccc; pointer-events: none; }
+        .pagination span.active {
+            background: #2196F3; color: white; padding: 4px 10px;
+            border-radius: 50%; margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Product List</h1>
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    <%
+        String pagerHtml = buildPager(currentPage, totalPages, base, qsPrefix);
+    %>
 
-    public String getCategory() {
-        return category;
-    }
+    <form method="get" action="products.jsp" id="filterForm">
+        <input type="hidden" name="sort" value="<%= sortCol %>" />
+        <input type="hidden" name="order" value="<%= order %>" />
+        <input type="hidden" name="page" value="1" />
+        <table>
+            <tr>
+                <th><a href="<%= base %>?sort=id&order=<%= sCol.equals("id") && asc ? "desc" : "asc" %>">ID &#8593;&#8595;</a></th>
+                <th><a href="<%= base %>?sort=name&order=<%= sCol.equals("name") && asc ? "desc" : "asc" %>">Name &#8593;&#8595;</a></th>
+                <th><a href="<%= base %>?sort=category&order=<%= sCol.equals("category") && asc ? "desc" : "asc" %>">Category &#8593;&#8595;</a></th>
+                <th><a href="<%= base %>?sort=price&order=<%= sCol.equals("price") && asc ? "desc" : "asc" %>">Price &#8593;&#8595;</a></th>
+                <th><a href="<%= base %>?sort=stock&order=<%= sCol.equals("stock") && asc ? "desc" : "asc" %>">Stock &#8593;&#8595;</a></th>
+            </tr>
+            <tr class="filter-row">
+                <td><input type="text" name="fId" value="<%= fId != null ? fId : "" %>" onchange="document.getElementById('filterForm').submit()" /></td>
+                <td><input type="text" name="fName" value="<%= fName != null ? fName : "" %>" onchange="document.getElementById('filterForm').submit()" /></td>
+                <td><input type="text" name="fCategory" value="<%= fCategory != null ? fCategory : "" %>" onchange="document.getElementById('filterForm').submit()" /></td>
+                <td><input type="text" name="fPrice" value="<%= fPrice != null ? fPrice : "" %>" onchange="document.getElementById('filterForm').submit()" /></td>
+                <td><input type="text" name="fStock" value="<%= fStock != null ? fStock : "" %>" onchange="document.getElementById('filterForm').submit()" /></td>
+            </tr>
+            <% for (Product p : pageData) { %>
+            <tr>
+                <td><%= p.id %></td>
+                <td><%= p.name %></td>
+                <td><%= p.category %></td>
+                <td><%= p.price %></td>
+                <td><%= p.stock %></td>
+            </tr>
+            <% } %>
+        </table>
+    </form>
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    <div class="pagination"><%= pagerHtml %></div>
+</div>
+</body>
+</html>
 
-    public double getPrice() {
-        return price;
-    }
+<%!
+    // Builds pagination links: << < 1 2 3 > >>
+    public String buildPager(int currentPage, int totalPages, String base, String qsPrefix) {
+        StringBuilder sb = new StringBuilder();
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+        if (currentPage > 1) {
+            sb.append("<a href='").append(base).append("?page=1&").append(qsPrefix).append("'>&laquo;</a> ");
+        } else {
+            sb.append("<a class='disabled'>&laquo;</a> ");
+        }
 
-    public int getStock() {
-        return stock;
-    }
+        if (currentPage > 1) {
+            sb.append("<a href='").append(base).append("?page=").append(currentPage - 1).append("&").append(qsPrefix).append("'>&lsaquo;</a> ");
+        } else {
+            sb.append("<a class='disabled'>&lsaquo;</a> ");
+        }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-}
-Step 10 :Right  click com.products-new-java class-name as : ProductBean and paste the following code  and ensure that the jdbc password should be the MySQL workbench password:PSGRKCW
-package com.products;
-
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Named;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
-@Named("productBean")
-@RequestScoped
-public class ProductBean {
-
-    private List<Product> products;
-
-    private String jdbcURL =
-            "jdbc:mysql://localhost:3306/prime";
-
-    private String jdbcUsername = "root";
-
-    private String jdbcPassword = "";
-
-    public List<Product> getProducts() {
-
-        if (products == null) {
-
-            products = new ArrayList<>();
-
-            try {
-
-                Class.forName("com.mysql.cj.jdbc.Driver");
-
-                Connection conn = DriverManager.getConnection(
-                        jdbcURL,
-                        jdbcUsername,
-                        jdbcPassword
-                );
-
-                Statement stmt = conn.createStatement();
-
-                ResultSet rs = stmt.executeQuery(
-                        "SELECT * FROM products"
-                );
-
-                while (rs.next()) {
-
-                    Product product = new Product(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("category"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock")
-                    );
-
-                    products.add(product);
-                }
-
-                rs.close();
-                stmt.close();
-                conn.close();
-
-            } catch (Exception e) {
-                e.printStackTrace();
+        for (int i = 1; i <= totalPages; i++) {
+            if (i == currentPage) {
+                sb.append("<span class='active'>").append(i).append("</span> ");
+            } else {
+                sb.append("<a href='").append(base).append("?page=").append(i).append("&").append(qsPrefix).append("'>").append(i).append("</a> ");
             }
         }
 
-        return products;
+        if (currentPage < totalPages) {
+            sb.append("<a href='").append(base).append("?page=").append(currentPage + 1).append("&").append(qsPrefix).append("'>&rsaquo;</a> ");
+        } else {
+            sb.append("<a class='disabled'>&rsaquo;</a> ");
+        }
+
+        if (currentPage < totalPages) {
+            sb.append("<a href='").append(base).append("?page=").append(totalPages).append("&").append(qsPrefix).append("'>&raquo;</a>");
+        } else {
+            sb.append("<a class='disabled'>&raquo;</a>");
+        }
+
+        return sb.toString();
     }
-}
-Step 11:Right click main-new -directory-Name as Webapp 
-Step 12:Right click webapp-New-File- name as :Products.xhtml and paste the code
-<!DOCTYPE html>
+%>
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:p="primefaces">
 
-<h:head>
-    <title>Product List</title>
-</h:head>
 
-<h:body>
+web.xml
 
-    <h1>Product List</h1>
-
-    <h:form>
-
-        <p:dataTable value="#{productBean.products}"
-                     var="prod"
-                     paginator="true"
-                     rows="5"
-                     sortMode="multiple"
-                     filterDelay="500">
-
-            <p:column headerText="ID"
-                      sortBy="#{prod.id}"
-                      filterBy="#{prod.id}">
-                <h:outputText value="#{prod.id}"/>
-            </p:column>
-
-            <p:column headerText="Name"
-                      sortBy="#{prod.name}"
-                      filterBy="#{prod.name}">
-                <h:outputText value="#{prod.name}"/>
-            </p:column>
-
-            <p:column headerText="Category"
-                      sortBy="#{prod.category}"
-                      filterBy="#{prod.category}">
-                <h:outputText value="#{prod.category}"/>
-            </p:column>
-
-            <p:column headerText="Price"
-                      sortBy="#{prod.price}"
-                      filterBy="#{prod.price}">
-                <h:outputText value="#{prod.price}"/>
-            </p:column>
-
-            <p:column headerText="Stock"
-                      sortBy="#{prod.stock}"
-                      filterBy="#{prod.stock}">
-                <h:outputText value="#{prod.stock}"/>
-            </p:column>
-
-        </p:dataTable>
-
-    </h:form>
-
-</h:body>
-
-</html>
-Step 13:Right click webapp-new-directory-name as: WEB-INF
-Step 14:Right click WEB-INF -New-file -beans.xml and paste the following code
 <?xml version="1.0" encoding="UTF-8"?>
-
-<beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
-       https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
-       version="4.0">
-</beans>
-Step 15:Right click WEB-INF -New-file -web.xml and paste the following code
-<?xml version="1.0" encoding="UTF-8"?>
-
-<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
-         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
-         version="6.0">
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
 
-    <servlet>
-        <servlet-name>Faces Servlet</servlet-name>
-
-        <servlet-class>
-            jakarta.faces.webapp.FacesServlet
-        </servlet-class>
-
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
-
-        <url-pattern>*.xhtml</url-pattern>
-    </servlet-mapping>
+    <display-name>ProductDetails</display-name>
 
     <welcome-file-list>
-        <welcome-file>Products.xhtml</welcome-file>
+        <welcome-file>products.jsp</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
 </web-app>
-Step 16:on the Right corner -click maven -double click your project-double click lifevycle and click on clean once it build success and then click on packages once it become build success add the tomcat
-Step 17:on the top click on current file click on edit configuration -click on tomcat local- click on tomcat version 10.1.59 or else download and add configuration 
-Step 18:click on deployement option in the edit configuration itself 
-Step 19:click add (which will be addition symbol) and click on PrimeFacesProducts:warexploded  and on the bottom application content  make sure that it should only contains /PrimeFacesProduct
-Step 20: click on apply and ok and then click on run 
-               
-
