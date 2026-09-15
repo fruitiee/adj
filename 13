@@ -1,0 +1,203 @@
+Open:
+
+Spring Initializr
+
+Select:
+
+Project       : Maven
+Language      : Java
+Packaging     : War
+Java          : 17
+Project details
+Group       : com.example
+Artifact    : EmpoyeeRegistration
+Dependencies
+
+Add:
+
+Spring Web
+Thymeleaf
+
+Click Generate.
+
+Extract the downloaded ZIP.
+In Eclipse:
+
+File
+ ↓
+Import
+ ↓
+Maven
+ ↓
+Existing Maven Projects
+ ↓
+Select extracted project
+ ↓
+Finish
+
+Wait for Maven Dependencies to download.
+
+Project Structure:
+EmpoyeeRegistration
+│
+├── src/main/java
+│   └── com.example.EmpoyeeRegistration
+│       ├── EmpoyeeRegistrationApplication.java
+│       └── EmployeeController.java
+│
+├── src/main/resources
+│   ├── templates
+│   │   ├── employee.html
+│   │   └── success.html
+│   │
+│   └── application.properties
+│
+└── pom.xml
+
+File:
+
+EmpoyeeRegistrationApplication.java
+Code:
+package com.example.EmpoyeeRegistration;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class EmpoyeeRegistrationApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(EmpoyeeRegistrationApplication.class, args);
+    }
+}
+
+7. Employee Controller
+
+Create:
+
+EmployeeController.java
+Code:
+package com.example.EmpoyeeRegistration;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class EmployeeController {
+
+    @GetMapping("/")
+    public String showForm() {
+        return "employee";
+    }
+
+    @PostMapping("/register")
+    public String register(String name, String id, String email,
+                           String department, String salary, Model model) {
+
+        model.addAttribute("name", name);
+        model.addAttribute("id", id);
+        model.addAttribute("email", email);
+        model.addAttribute("department", department);
+        model.addAttribute("salary", salary);
+
+        return "success";
+    }
+}
+
+Create folder:
+If template folder already exists,just create files)
+src/main/resources/templates
+
+Inside it create:
+
+employee.html
+Code:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Registration</title>
+</head>
+<body>
+
+<h2>Employee Registration Form</h2>
+
+<form action="/register" method="post">
+
+    Employee Name:
+    <input type="text" name="name" required>
+    <br><br>
+
+    Employee ID:
+    <input type="text" name="id" required>
+    <br><br>
+
+    Email:
+    <input type="email" name="email" required>
+    <br><br>
+
+    Department:
+    <input type="text" name="department" required>
+    <br><br>
+
+    Salary:
+    <input type="number" name="salary" required>
+    <br><br>
+
+    <input type="submit" value="Register">
+
+</form>
+
+</body>
+</html>
+
+Inside the same templates folder create:
+
+success.html
+Code:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Success</title>
+</head>
+<body>
+
+<h2>Employee Registered Successfully!</h2>
+
+<p>Employee Name: <span th:text="${name}"></span></p>
+
+<p>Employee ID: <span th:text="${id}"></span></p>
+
+<p>Email: <span th:text="${email}"></span></p>
+
+<p>Department: <span th:text="${department}"></span></p>
+
+<p>Salary: <span th:text="${salary}"></span></p>
+
+</body>
+</html>
+10. application.properties
+
+Open:
+
+src/main/resources/application.properties
+
+Since your 8080/8081 ports were occupied, we used 8081.
+
+Put:
+
+server.port=8081
+Run the Program
+
+In Eclipse:
+
+EmpoyeeRegistrationApplication.java
+        ↓
+Right Click
+        ↓
+Run As
+        ↓
+Java Application
+
+Spring succesfully run---then go to browser-->http://localhost:8081/
