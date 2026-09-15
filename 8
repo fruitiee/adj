@@ -1,0 +1,73 @@
+File---->New------>Dynamin Web project---File Name: StudentRegistration
+Click next > click next > Generate web.xml deployment descriptor' checkbox tick pannunga > click Finish 
+in project explorer
+>src
+>main
+>webapp ------> right click ------> new------>index.jsp
+>src
+>main
+>webapp ------> right click ------> new------>welcome.jsp
+
+index.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .form-box {
+            width: 350px; margin: 50px auto; padding: 25px;
+            border: 1px solid #ccc; border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        h2 { text-align: center; }
+        label { display: inline-block; width: 70px; font-weight: bold; }
+        input[type=text], input[type=email] {
+            width: 220px; padding: 6px; margin: 8px 0;
+            border: 1px solid #aaa; border-radius: 4px;
+        }
+        input[type=submit] {
+            background: #2196F3; color: white; border: none;
+            padding: 8px 20px; border-radius: 4px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-box">
+        <h2>Student Registration Form</h2>
+        <form action="welcome.jsp" method="post">
+            <label>Name:</label>
+            <input type="text" name="name" required /><br/>
+            <label>Email:</label>
+            <input type="email" name="email" required /><br/><br/>
+            <input type="submit" value="Register" />
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+welcome.jsp
+
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%
+    String name = request.getParameter("name");
+    String email = request.getParameter("email");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Successful</title>
+    <style> body { font-family: Arial, sans-serif; margin: 40px; } </style>
+</head>
+<body>
+    <h2>Registration Successful!</h2>
+    <p>Thank you, <b><%= name %></b>, for registering!</p>
+    <p>We've received your email: <b><%= email %></b></p>
+    <a href="index.jsp">Back to Form</a>
+</body>
+</html>
